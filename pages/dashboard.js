@@ -25,7 +25,7 @@ export default function Dashboard() {
     if (!storedRole || !storedTabs.length || !userUid) {
       router.push("/");
       return;
-    }
+    } 0
 
     setRole(storedRole);
     setAllowedTabs(storedTabs);
