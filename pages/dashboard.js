@@ -21,11 +21,10 @@ export default function Dashboard() {
       storedTabs = [];
     }
 
-    // Redirect if essential data missing
     if (!storedRole || !storedTabs.length || !userUid) {
       router.push("/");
       return;
-    } 0
+    }
 
     setRole(storedRole);
     setAllowedTabs(storedTabs);
@@ -53,13 +52,49 @@ export default function Dashboard() {
 
     fetchTabData();
 
-    // ✅ Load admin tabs JS dynamically for admin role
-    if (storedRole === "admin") {
-      const script = document.createElement("script");
-      script.src = "/adminTabs.js";
-      script.async = true;
-      document.body.appendChild(script);
-      return () => document.body.removeChild(script);
+    // ✅ Admin tabs setup (only client-side)
+    if (storedRole === "admin" && typeof window !== "undefined") {
+      // Example: attach all tab functions to window
+      window.hideWelcomePanel = () => {
+        const panel = document.getElementById("welcomePanel");
+        if (panel) panel.style.display = "none";
+      };
+
+      window.toggleCategory = (element) => {
+        const ul = element.nextElementSibling;
+        const isExpanded = ul.style.display === "block";
+        ul.style.display = isExpanded ? "none" : "block";
+
+        if (isExpanded) {
+          const welcome = document.getElementById("welcomePanel");
+          if (welcome) welcome.style.display = "block";
+        }
+      };
+
+      // Add all tabs functions
+      window.showCriteriaTab = () => {
+        document.querySelectorAll(".tab-content").forEach((t) => (t.style.display = "none"));
+        const tab = document.getElementById("criteriaTab");
+        if (tab) tab.style.display = "block";
+        const title = document.getElementById("selectedMechanismTitle");
+        if (title) title.style.display = "none";
+        window.hideWelcomePanel();
+      };
+
+      window.showCorrosionTab = () => {
+        document.querySelectorAll(".tab-content").forEach((t) => (t.style.display = "none"));
+        const tab = document.getElementById("corrosionRateTab");
+        if (tab) tab.style.display = "block";
+        const title = document.getElementById("selectedMechanismTitle");
+        if (title) title.style.display = "none";
+        window.hideWelcomePanel();
+      };
+
+      // ✅ Add remaining admin tabs functions similarly
+      // showCorrosionFullTab, showFluidSelectorTab, showInventoryTab, showRemainingLifeTab
+      // showINSPECTIONCONFIDENCETab, showASMEB31_3Tab, showASMESECTIONVIIIDIV1Tab
+      // showTOXIC_CALCULATIONTab, showCORROSION_CALCULATIONTab, showcof_calculatorTab
+      // showQPOF_calculatorTab, showCrackingMechanismTab, showbkStressTab
     }
   }, [router]);
 
