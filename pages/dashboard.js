@@ -52,6 +52,15 @@ export default function Dashboard() {
     };
 
     fetchTabData();
+
+    // ✅ Load admin tabs JS dynamically for admin role
+    if (storedRole === "admin") {
+      const script = document.createElement("script");
+      script.src = "/adminTabs.js";
+      script.async = true;
+      document.body.appendChild(script);
+      return () => document.body.removeChild(script);
+    }
   }, [router]);
 
   if (loading) return <p>Loading...</p>;
