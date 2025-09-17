@@ -1,3 +1,7 @@
+// top of Dashboard.js
+import ASMECalculatorTab from "../components/ASMECalculatorTab";
+
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { collection, getDocs } from "firebase/firestore";
@@ -125,6 +129,11 @@ export default function Dashboard() {
       ) : (
         <p>No tab data available for your role.</p>
       )}
+
+{allowedTabs.includes("ASME SECTION VIII DIV.1") && (
+  <ASMECalculatorTab />
+)}
+
     </div>
   );
 }
