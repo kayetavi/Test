@@ -1,130 +1,85 @@
-// ✅ Top: Import component
-import ASMECalculatorTab from "../components/ASMECalculatorTab";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase-config";
 
+import ASMECalculatorTab from "../components/ASMECalculatorTab";
+import styles from "../styles/Dashboard.module.css"; // <-- import css module
+
 export default function Dashboard() {
   const [role, setRole] = useState("");
   const [allowedTabs, setAllowedTabs] = useState([]);
-  const [tabData, setTabData] = useState([]);
+  const [userEmail, setUserEmail] = useState("");
+  const [activeTab, setActiveTab] = useState("");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(""); // ✅ added for tab click
   const router = useRouter();
 
   useEffect(() => {
     const storedRole = localStorage.getItem("userRole") || "";
+    const storedTabs = JSON.parse(localStorage.getItem("allowedTabs") || "[]");
     const userUid = localStorage.getItem("userUid") || "";
-    let storedTabs = [];
+    const email = localStorage.getItem("userEmail") || "";
 
-    try {
-      storedTabs = JSON.parse(localStorage.getItem("allowedTabs") || "[]");
-    } catch (err) {
-      storedTabs = [];
-    }
-
-    if (!storedRole || !storedTabs.length || !userUid) {
+    if (!storedRole || storedTabs.length === 0 || !userUid) {
       router.push("/");
       return;
     }
 
     setRole(storedRole);
     setAllowedTabs(storedTabs);
+    setUserEmail(email);
 
-    const fetchTabData = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "tabs_data"));
-        const filteredData = [];
+    if (storedTabs.length > 0) setActiveTab(storedTabs[0]);
 
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (storedTabs.includes(data?.tabName)) {
-            filteredData.push(data);
-          }
-        });
-
-        setTabData(filteredData);
-      } catch (err) {
-        console.error("Error fetching tab data:", err);
-        setTabData([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTabData();
-
-    // Admin-only tab setup
-    if (storedRole === "admin" && typeof window !== "undefined") {
-      window.hideWelcomePanel = () => {
-        const panel = document.getElementById("welcomePanel");
-        if (panel) panel.style.display = "none";
-      };
-
-      window.toggleCategory = (element) => {
-        const ul = element.nextElementSibling;
-        const isExpanded = ul.style.display === "block";
-        ul.style.display = isExpanded ? "none" : "block";
-
-        if (isExpanded) {
-          const welcome = document.getElementById("welcomePanel");
-          if (welcome) welcome.style.display = "block";
-        }
-      };
-    }
+    setLoading(false);
   }, [router]);
 
   if (loading) return <p>Loading...</p>;
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "ASMESECTIONVIIIDIV1":
+        return <ASMECalculatorTab />;
+      // Add other cases here
+      default:
+        return <p>Select a tab to view content.</p>;
+    }
+  };
+
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Dashboard</h1>
-      <h2>Welcome, {role ? (role === "admin" ? "Admin" : "User") : "Guest"}!</h2>
+    <div className={styles.container}>
+      {/* Top Bar */}
+      <header className={styles.header}>
+        Welcome <span className={styles.userEmail}>{userEmail || "User"}</span>! Risk Based Inspection Dashboard
+      </header>
 
-      <h3>Accessible Tabs:</h3>
-      <ul>
-        {allowedTabs?.length > 0 ? (
-          allowedTabs.map((tab, idx) => (
-            <li key={idx}>
-              <button
-                style={{
-                  backgroundColor: activeTab === tab ? "#ddd" : "#f5f5f5",
-                  border: "1px solid #ccc",
-                  padding: "6px 12px",
-                  marginBottom: "5px",
-                  cursor: "pointer",
-                  fontWeight: "bold"
-                }}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab}
-              </button>
-            </li>
-          ))
-        ) : (
-          <li>No accessible tabs</li>
-        )}
-      </ul>
+      {/* Main Content */}
+      <div className={styles.mainContent}>
+        {/* Sidebar */}
+        <aside className={styles.sidebar}>
+          <h3>Features</h3>
+          <ul className={styles.featuresList}>
+            {allowedTabs.map((tab) => (
+              <li key={tab}>
+                <button
+                  onClick={() => setActiveTab(tab)}
+                  className={`${styles.tabButton} ${activeTab === tab ? styles.tabButtonActive : ""}`}
+                >
+                  {tab}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </aside>
 
-      <h3>Tab Data:</h3>
-      {tabData?.length > 0 ? (
-        tabData.map((tab, idx) => (
-          <div key={idx} style={{ border: "1px solid #ccc", margin: "10px", padding: "10px" }}>
-            <h4>{tab?.tabName || "No Name"}</h4>
-            <p>{tab?.description || "No Description"}</p>
-          </div>
-        ))
-      ) : (
-        <p>No tab data available for your role.</p>
-      )}
+        {/* Right Panel */}
+        <main className={styles.mainPanel}>{renderTabContent()}</main>
+      </div>
 
-      {/* ✅ Conditionally render tab content */}
-      {activeTab === "ASMESECTIONVIIIDIV1" && (
-        <div style={{ marginTop: "20px" }}>
-          <ASMECalculatorTab />
-        </div>
-      )}
+      {/* Footer */}
+      <footer className={styles.footer}>
+        © 2025 | Created by Avijit Kayet | About | Privacy Policy | Contact
+      </footer>
     </div>
   );
 }
