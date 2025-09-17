@@ -1,7 +1,5 @@
-// top of Dashboard.js
+// ✅ Top: Import component
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
-
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { collection, getDocs } from "firebase/firestore";
@@ -12,8 +10,9 @@ export default function Dashboard() {
   const [allowedTabs, setAllowedTabs] = useState([]);
   const [tabData, setTabData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(""); // ✅ added for tab click
   const router = useRouter();
-  
+
   useEffect(() => {
     const storedRole = localStorage.getItem("userRole") || "";
     const userUid = localStorage.getItem("userUid") || "";
@@ -56,9 +55,8 @@ export default function Dashboard() {
 
     fetchTabData();
 
-    // ✅ Admin tabs setup (only client-side)
+    // Admin-only tab setup
     if (storedRole === "admin" && typeof window !== "undefined") {
-      // Example: attach all tab functions to window
       window.hideWelcomePanel = () => {
         const panel = document.getElementById("welcomePanel");
         if (panel) panel.style.display = "none";
@@ -74,31 +72,6 @@ export default function Dashboard() {
           if (welcome) welcome.style.display = "block";
         }
       };
-
-      // Add all tabs functions
-      window.showCriteriaTab = () => {
-        document.querySelectorAll(".tab-content").forEach((t) => (t.style.display = "none"));
-        const tab = document.getElementById("criteriaTab");
-        if (tab) tab.style.display = "block";
-        const title = document.getElementById("selectedMechanismTitle");
-        if (title) title.style.display = "none";
-        window.hideWelcomePanel();
-      };
-
-      window.showCorrosionTab = () => {
-        document.querySelectorAll(".tab-content").forEach((t) => (t.style.display = "none"));
-        const tab = document.getElementById("corrosionRateTab");
-        if (tab) tab.style.display = "block";
-        const title = document.getElementById("selectedMechanismTitle");
-        if (title) title.style.display = "none";
-        window.hideWelcomePanel();
-      };
-
-      // ✅ Add remaining admin tabs functions similarly
-      // showCorrosionFullTab, showFluidSelectorTab, showInventoryTab, showRemainingLifeTab
-      // showINSPECTIONCONFIDENCETab, showASMEB31_3Tab, showASMESECTIONVIIIDIV1Tab
-      // showTOXIC_CALCULATIONTab, showCORROSION_CALCULATIONTab, showcof_calculatorTab
-      // showQPOF_calculatorTab, showCrackingMechanismTab, showbkStressTab
     }
   }, [router]);
 
@@ -112,7 +85,23 @@ export default function Dashboard() {
       <h3>Accessible Tabs:</h3>
       <ul>
         {allowedTabs?.length > 0 ? (
-          allowedTabs.map((tab, idx) => <li key={idx}><strong>{tab}</strong></li>)
+          allowedTabs.map((tab, idx) => (
+            <li key={idx}>
+              <button
+                style={{
+                  backgroundColor: activeTab === tab ? "#ddd" : "#f5f5f5",
+                  border: "1px solid #ccc",
+                  padding: "6px 12px",
+                  marginBottom: "5px",
+                  cursor: "pointer",
+                  fontWeight: "bold"
+                }}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            </li>
+          ))
         ) : (
           <li>No accessible tabs</li>
         )}
@@ -130,10 +119,12 @@ export default function Dashboard() {
         <p>No tab data available for your role.</p>
       )}
 
-{allowedTabs.includes("ASME SECTION VIII DIV.1") && (
-  <ASMECalculatorTab />
-)}
-
+      {/* ✅ Conditionally render tab content */}
+      {activeTab === "ASME SECTION VIII DIV.1" && (
+        <div style={{ marginTop: "20px" }}>
+          <ASMECalculatorTab />
+        </div>
+      )}
     </div>
   );
 }
