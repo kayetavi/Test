@@ -37,16 +37,18 @@ export default function Home() {
         }
 
         // 3️⃣ Save data in localStorage
-        try {
-          localStorage.setItem("userUid", uid);
-          localStorage.setItem("userRole", role);
-          localStorage.setItem("allowedTabs", JSON.stringify(allowedTabs));
-        } catch (err) {
-          console.error("Error saving to localStorage:", err);
-          setError("Failed to save user data locally.");
-          setLoading(false);
-          return;
-        }
+        // 3️⃣ Save data in localStorage
+try {
+  localStorage.setItem("userUid", uid);
+  localStorage.setItem("userRole", role);
+  localStorage.setItem("allowedTabs", JSON.stringify(allowedTabs));
+  localStorage.setItem("userEmail", userCredential.user.email); // <-- Ye line add karo
+} catch (err) {
+  console.error("Error saving to localStorage:", err);
+  setError("Failed to save user data locally.");
+  setLoading(false);
+  return;
+}
 
         // 4️⃣ Redirect to dashboard
         router.push("/dashboard");
