@@ -11,13 +11,13 @@ export default function Dashboard() {
     const userUid = localStorage.getItem("userUid") || "";
     const email = localStorage.getItem("userEmail") || "";
 
-    // If not logged in or incomplete info, redirect to login
+    // If not logged in or missing info, redirect to login
     if (!storedRole || storedTabs.length === 0 || !userUid) {
       router.push("/");
       return;
     }
 
-    // Optionally expose user data to window/global if needed by legacy JS
+    // ✅ Expose user info to global for legacy HTML
     window.userData = {
       role: storedRole,
       allowedTabs: storedTabs,
@@ -28,21 +28,18 @@ export default function Dashboard() {
     setLoading(false);
   }, [router]);
 
-  // Inject legacy script (includes full UI design & logic)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const script = document.createElement("script");
-      script.src = "/dashboard.html";
-      script.defer = true;
-      document.body.appendChild(script);
-
-      return () => {
-        document.body.removeChild(script);
-      };
-    }
-  }, []);
-
   if (loading) return <p>Loading...</p>;
 
-  return null; // No design, layout handled by HTML + JS
+  // ✅ Embed your static HTML as iframe
+  return (
+    <iframe
+      src="/dashboard.html"
+      style={{
+        width: "100%",
+        height: "100vh",
+        border: "none",
+      }}
+      title="Dashboard"
+    />
+  );
 }
