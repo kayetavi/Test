@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase-config";
+
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
+// Import other tab components similarly...
+
 import styles from "../styles/Dashboard.module.css";
 
 export default function Dashboard() {
@@ -10,6 +14,21 @@ export default function Dashboard() {
   const [userEmail, setUserEmail] = useState("");
   const [activeTab, setActiveTab] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // For dropdown show/hide
+  const [settingsDropdownVisible, setSettingsDropdownVisible] = useState(false);
+
+  // For expanded categories (store expanded category keys)
+  const [expandedCategories, setExpandedCategories] = useState({});
+
+  // For modal visibility
+  const [modalVisible, setModalVisible] = useState({
+    cduVdu: false,
+    processFlow: false,
+    msp: false,
+    h2u: false,
+  });
+
   const router = useRouter();
 
   useEffect(() => {
@@ -26,51 +45,148 @@ export default function Dashboard() {
     setRole(storedRole);
     setAllowedTabs(storedTabs);
     setUserEmail(email);
+
     if (storedTabs.length > 0) setActiveTab(storedTabs[0]);
+
     setLoading(false);
   }, [router]);
 
+  // Click outside dropdown to close
   useEffect(() => {
-    // Dropdown Toggle
-    const settingsBtn = document.getElementById("settingsBtn");
-    const dropdown = document.getElementById("dropdownContent");
-
-    const handleClick = (e) => {
-      e.stopPropagation();
-      dropdown?.classList.toggle("show");
-    };
-
-    const handleWindowClick = () => {
-      dropdown?.classList.remove("show");
-    };
-
-    settingsBtn?.addEventListener("click", handleClick);
-    window.addEventListener("click", handleWindowClick);
-
-    // Inject categories
-    injectAPI581Category();
-    injectAPI570Category();
-    injectDesignThicknessCalculatorCategory();
-    injectProcessFlowDiagramsCategory();
-    injectCrackingMechanismCategory();
-    injectStressMaterialDataCategory();
-
-    return () => {
-      settingsBtn?.removeEventListener("click", handleClick);
-      window.removeEventListener("click", handleWindowClick);
-    };
-  }, []);
+    function handleClickOutside() {
+      if (settingsDropdownVisible) setSettingsDropdownVisible(false);
+    }
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, [settingsDropdownVisible]);
 
   if (loading) return <p>Loading...</p>;
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "ASMESECTIONVIIIDIV1":
-        return <ASMECalculatorTab />;
-      default:
-        return <p>Select a tab to view content.</p>;
-    }
+  // Helper to toggle category/subcategory expansion
+  function toggleCategory(key) {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  }
+
+  // Hide welcome panel: we can simulate by no special "welcome" div, or keep a flag for it if needed
+
+  // Show/hide modals (example)
+  function openModal(name) {
+    setModalVisible((prev) => ({
+      cduVdu: false,
+      processFlow: false,
+      msp: false,
+      h2u: false,
+      [name]: true,
+    }));
+    setActiveTab(""); // clear active tab when modal opens
+  }
+
+  function closeModal(name) {
+    setModalVisible((prev) => ({
+      ...prev,
+      [name]: false,
+    }));
+  }
+
+  // Map of tab name => render function/component
+  const tabContentMap = {
+    ASMESECTIONVIIIDIV1: <ASMECalculatorTab />,
+    // Add other tab components here:
+    // CRITERIA: <CriteriaTab />,
+    // CORROSION_RATE: <CorrosionRateTab />,
+    // etc...
   };
+
+  // Sidebar categories as React data with nested structure
+  const categories = [
+    {
+      key: "api581",
+      label: "Risk-Based Inspection Methodology",
+      mechanisms: [
+        { key: "criteria", label: "Criteria of Finding Damage Mechanism", tab: "CRITERIA" },
+        { key: "corrosionFull", label: "Damage Mechanism – Corrosion Rate Estimator", tab: "CORROSION_FULL" },
+        { key: "fluidSelector", label: "Representative Fluid", tab: "FLUID_SELECTOR" },
+        { key: "inventory", label: "Inventory Calculator", tab: "INVENTORY" },
+        { key: "inspectionConfidence", label: "Inspection Confidence", tab: "INSPECTION_CONFIDENCE" },
+        { key: "toxicCalculation", label: "Toxic % Calculation", tab: "TOXIC_CALCULATION" },
+        {
+          key: "quantitative",
+          label: "Quantitative",
+          subMechanisms: [
+            { key: "cofCalculator", label: "Risk Calculator_COF", tab: "COF_CALCULATOR" },
+            { key: "qpofCalculator", label: "Risk Calculator_POF", tab: "QPOF_CALCULATOR" },
+          ],
+        },
+        {
+          key: "semiQuantitative",
+          label: "Semi Quantitative",
+          subMechanisms: [
+            { key: "corrosionCalculation", label: "Risk Calculator", tab: "CORROSION_CALCULATION" },
+          ],
+        },
+      ],
+    },
+    {
+      key: "api570",
+      label: "Thickness Data Evaluation & Analysis",
+      mechanisms: [
+        { key: "remainingLife", label: "Statistical Analysis", tab: "REMAINING_LIFE" },
+      ],
+    },
+    {
+      key: "designThicknessCalculator",
+      label: "Design Thickness Calculator",
+      mechanisms: [
+        { key: "processPiping", label: "Process Piping", tab: "ASMEB31_3" },
+        { key: "pressureVessel", label: "Pressure Vessel", tab: "ASMESECTIONVIIIDIV1" },
+      ],
+    },
+    {
+      key: "crackingMechanism",
+      label: "Cracking Mechanism Finder",
+      mechanisms: [
+        { key: "openFinder", label: "Open Finder", tab: "CRACKING_MECHANISM" },
+      ],
+    },
+    {
+      key: "stressMaterialData",
+      label: "Stress & Material Data",
+      mechanisms: [
+        { key: "stressValue", label: "Stress value", tab: "BK_STRESS" },
+      ],
+    },
+    {
+      key: "processFlowDiagrams",
+      label: "Corrosion Diagrams",
+      mechanisms: [
+        { key: "hydroprocessing", label: "HYDROPROCESSING", modal: "processFlow" },
+        { key: "cduVdu", label: "CDU / VDU", modal: "cduVdu" },
+        { key: "msp", label: "MSP", modal: "msp" },
+        { key: "h2u", label: "H2U", modal: "h2u" },
+      ],
+    },
+  ];
+
+  // When clicking mechanism:
+  // If it has modal, open modal; else set active tab
+
+  function onMechanismClick(mech) {
+    if (mech.modal) {
+      openModal(mech.modal);
+    } else {
+      setActiveTab(mech.tab);
+      // close all modals
+      setModalVisible({
+        cduVdu: false,
+        processFlow: false,
+        msp: false,
+        h2u: false,
+      });
+    }
+  }
 
   return (
     <div className={styles.container}>
@@ -79,8 +195,26 @@ export default function Dashboard() {
         Welcome{" "}
         <span className={styles.userEmail}>
           {userEmail ? userEmail.split("@")[0] : "User"}
-        </span>{" "}
+        </span>
         ! Risk Based Inspection Dashboard
+
+        <button
+          id="settingsBtn"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSettingsDropdownVisible(!settingsDropdownVisible);
+          }}
+          className={styles.settingsButton}
+        >
+          Settings
+        </button>
+
+        {settingsDropdownVisible && (
+          <div id="dropdownContent" className={styles.dropdownContent}>
+            <p>Settings option 1</p>
+            <p>Settings option 2</p>
+          </div>
+        )}
       </header>
 
       {/* Main Content */}
@@ -88,28 +222,106 @@ export default function Dashboard() {
         {/* Sidebar */}
         <aside className={styles.sidebar}>
           <h3>Features</h3>
-          <ul className={styles.featuresList}>
-            {allowedTabs.map((tab) => (
-              <li key={tab}>
-                <button
-                  onClick={() => setActiveTab(tab)}
-                  className={`${styles.tabButton} ${
-                    activeTab === tab ? styles.tabButtonActive : ""
-                  }`}
+
+          <ul className={styles.categoryList} id="categoryList">
+            {categories.map(({ key, label, mechanisms }) => (
+              <li key={key}>
+                <span
+                  className={styles.category}
+                  onClick={() => toggleCategory(key)}
+                  style={{ cursor: "pointer" }}
                 >
-                  {tab}
-                </button>
+                  {label}
+                </span>
+                {expandedCategories[key] && (
+                  <ul className={styles.mechanisms}>
+                    {mechanisms.map((mech) =>
+                      mech.subMechanisms ? (
+                        <li key={mech.key}>
+                          <span
+                            className={styles.subcategory}
+                            onClick={() => toggleCategory(mech.key)}
+                            style={{ cursor: "pointer" }}
+                          >
+                            {mech.label}
+                          </span>
+                          {expandedCategories[mech.key] && (
+                            <ul className={styles.mechanisms}>
+                              {mech.subMechanisms.map((subMech) => (
+                                <li key={subMech.key}>
+                                  <a
+                                    href="#"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      onMechanismClick(subMech);
+                                    }}
+                                  >
+                                    {subMech.label}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      ) : (
+                        <li key={mech.key}>
+                          <a
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onMechanismClick(mech);
+                            }}
+                          >
+                            {mech.label}
+                          </a>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>
-
-          {/* 🔽 Injected Category Panel */}
-          <ul id="categoryList" className={styles.featuresList}></ul>
         </aside>
 
         {/* Right Panel */}
-        <main className={styles.mainPanel}>{renderTabContent()}</main>
+        <main className={styles.mainPanel}>
+          {/* Render tab content based on activeTab */}
+          {activeTab ? (
+            tabContentMap[activeTab] || (
+              <p>No content available for this tab yet.</p>
+            )
+          ) : (
+            <p>Select a tab to view content.</p>
+          )}
+        </main>
       </div>
+
+      {/* Modals */}
+      {modalVisible.cduVdu && (
+        <div className={styles.modal}>
+          <button onClick={() => closeModal("cduVdu")}>Close CDU/VDU Modal</button>
+          {/* Modal content and initCDUVDU() logic here */}
+        </div>
+      )}
+      {modalVisible.processFlow && (
+        <div className={styles.modal}>
+          <button onClick={() => closeModal("processFlow")}>Close Process Flow Modal</button>
+          {/* Modal content */}
+        </div>
+      )}
+      {modalVisible.msp && (
+        <div className={styles.modal}>
+          <button onClick={() => closeModal("msp")}>Close MSP Modal</button>
+          {/* Modal content */}
+        </div>
+      )}
+      {modalVisible.h2u && (
+        <div className={styles.modal}>
+          <button onClick={() => closeModal("h2u")}>Close H2U Modal</button>
+          {/* Modal content */}
+        </div>
+      )}
 
       {/* Footer */}
       <footer className={styles.footer}>
@@ -117,125 +329,4 @@ export default function Dashboard() {
       </footer>
     </div>
   );
-}
-
-//////////////////////////////////////////////////////////
-// ✅ Inject Category + Show/Hide Functions (as required)
-//////////////////////////////////////////////////////////
-
-function hideWelcomePanel() {
-  const panel = document.getElementById("welcomePanel");
-  if (panel) panel.style.display = "none";
-}
-
-function hideAllMainPanels() {
-  document.querySelectorAll(".tab-content").forEach((t) => (t.style.display = "none"));
-}
-
-function toggleCategory(element) {
-  const ul = element.nextElementSibling;
-  const isExpanded = ul.style.display === "block";
-  ul.style.display = isExpanded ? "none" : "block";
-
-  if (isExpanded) {
-    hideAllMainPanels();
-    const welcome = document.getElementById("welcomePanel");
-    if (welcome) welcome.style.display = "block";
-  }
-}
-
-function injectAPI581Category() {
-  const categoryList = document.getElementById("categoryList");
-  const api581 = document.createElement("li");
-
-  api581.innerHTML = `
-    <span class="category" onclick="toggleCategory(this)">Risk-Based Inspection Methodology</span>
-    <ul class="mechanisms" style="display:none;">
-      <li><a href="#" onclick="hideAllMainPanels(); showCriteriaTab(); hideWelcomePanel()">Criteria of Finding Damage Mechanism</a></li>
-      <li><a href="#" onclick="hideAllMainPanels(); showCorrosionFullTab(); hideWelcomePanel()">Damage Mechanism – Corrosion Rate Estimator</a></li>
-      <li><a href="#" onclick="hideAllMainPanels(); showFluidSelectorTab(); hideWelcomePanel()">Representative Fluid</a></li>
-      <li><a href="#" onclick="hideAllMainPanels(); showInventoryTab(); hideWelcomePanel()">Inventory Calculator</a></li>
-      <li><a href="#" onclick="hideAllMainPanels(); showINSPECTIONCONFIDENCETab(); hideWelcomePanel()">Inspection Confidence</a></li>
-      <li><a href="#" onclick="hideAllMainPanels(); showTOXIC_CALCULATIONTab(); hideWelcomePanel()">Toxic % Calculation</a></li>
-      
-      <li>
-        <span class="subcategory" onclick="toggleCategory(this)">Quantitative</span>
-        <ul class="mechanisms" style="display:none;">
-          <li><a href="#" onclick="hideAllMainPanels(); showcof_calculatorTab(); hideWelcomePanel()">Risk Calculator_COF</a></li>
-          <li><a href="#" onclick="hideAllMainPanels(); showQPOF_calculatorTab(); hideWelcomePanel()">Risk Calculator_POF</a></li>
-        </ul>
-      </li>
-
-      <li>
-        <span class="subcategory" onclick="toggleCategory(this)">Semi Quantitative</span>
-        <ul class="mechanisms" style="display:none;">
-          <li><a href="#" onclick="hideAllMainPanels(); showCORROSION_CALCULATIONTab(); hideWelcomePanel()">Risk Calculator</a></li>
-        </ul>
-      </li>
-    </ul>
-  `;
-  categoryList.appendChild(api581);
-}
-
-function injectAPI570Category() {
-  const categoryList = document.getElementById("categoryList");
-  const api570 = document.createElement("li");
-  api570.innerHTML = `
-    <span class="category" onclick="toggleCategory(this)">Thickness Data Evaluation & Analysis</span>
-    <ul class="mechanisms" style="display:none;">
-      <li><a href="#" onclick="hideAllMainPanels(); showRemainingLifeTab(); hideWelcomePanel()">Statistical Analysis</a></li>
-    </ul>
-  `;
-  categoryList.appendChild(api570);
-}
-
-function injectDesignThicknessCalculatorCategory() {
-  const categoryList = document.getElementById("categoryList");
-  const item = document.createElement("li");
-  item.innerHTML = `
-    <span class="category" onclick="toggleCategory(this)">Design Thickness Calculator</span>
-    <ul class="mechanisms" style="display:none;">
-      <li><a href="#" onclick="event.preventDefault(); hideAllMainPanels(); showASMEB31_3Tab(); hideWelcomePanel();">Process Piping</a></li>
-      <li><a href="#" onclick="event.preventDefault(); hideAllMainPanels(); showASMESECTIONVIIIDIV1Tab(); hideWelcomePanel();">Pressure Vessel</a></li>
-    </ul>
-  `;
-  categoryList.appendChild(item);
-}
-
-function injectProcessFlowDiagramsCategory() {
-  const categoryList = document.getElementById("categoryList");
-  const item = document.createElement("li");
-  item.innerHTML = `
-    <span class="category" onclick="toggleCategory(this)">Corrosion Diagrams</span>
-    <ul class="mechanisms" style="display:none;">
-      <li><a href="#" onclick="event.preventDefault(); showPROCESSFLOWDIAGRAMSTab();">HYDROPROCESSING</a></li>
-      <li><a href="#" onclick="event.preventDefault(); showPROCESSFLOWDIAGRAMSFCCU();">FCCU</a></li>
-    </ul>
-  `;
-  categoryList.appendChild(item);
-}
-
-function injectCrackingMechanismCategory() {
-  const categoryList = document.getElementById("categoryList");
-  const item = document.createElement("li");
-  item.innerHTML = `
-    <span class="category" onclick="toggleCategory(this)">Cracking Mechanism</span>
-    <ul class="mechanisms" style="display:none;">
-      <li><a href="#" onclick="event.preventDefault(); hideAllMainPanels(); showBRITTLEFRACTURETab(); hideWelcomePanel();">BRITTLE FRACTURE</a></li>
-    </ul>
-  `;
-  categoryList.appendChild(item);
-}
-
-function injectStressMaterialDataCategory() {
-  const categoryList = document.getElementById("categoryList");
-  const item = document.createElement("li");
-  item.innerHTML = `
-    <span class="category" onclick="toggleCategory(this)">Material Data</span>
-    <ul class="mechanisms" style="display:none;">
-      <li><a href="#" onclick="event.preventDefault(); hideAllMainPanels(); showSTRESSVALUETab(); hideWelcomePanel();">Stress Value</a></li>
-      <li><a href="#" onclick="event.preventDefault(); hideAllMainPanels(); showMATERIALSTRENGTHTab(); hideWelcomePanel();">Material Strength</a></li>
-    </ul>
-  `;
-  categoryList.appendChild(item);
 }
