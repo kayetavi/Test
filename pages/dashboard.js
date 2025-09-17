@@ -120,7 +120,7 @@ export default function Dashboard() {
       )}
 
       {/* ✅ Conditionally render tab content */}
-      {activeTab === "ASME SECTION VIII DIV.1" && (
+      {activeTab === "ASMESECTIONVIIIDIV1" && (
         <div style={{ marginTop: "20px" }}>
           <ASMECalculatorTab />
         </div>
