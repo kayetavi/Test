@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+
+// Import all tab components
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
-// Import other tab components here, for example:
 import CriteriaTab from "../components/CriteriaTab";
 import CorrosionRateTab from "../components/CorrosionRateTab";
 import CorrosionFullTab from "../components/CorrosionFullTab";
@@ -16,7 +17,6 @@ import QpofCalculatorTab from "../components/QpofCalculatorTab";
 import CrackingMechanismTab from "../components/CrackingMechanismTab";
 import BkStressTab from "../components/BkStressTab";
 import ASMEB31_3Tab from "../components/ASMEB31_3Tab";
-// ...add other imports for tabs here
 
 import styles from "../styles/Dashboard.module.css";
 
@@ -29,11 +29,13 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
+    // Load user info and permissions from localStorage
     const storedRole = localStorage.getItem("userRole") || "";
     const storedTabs = JSON.parse(localStorage.getItem("allowedTabs") || "[]");
     const userUid = localStorage.getItem("userUid") || "";
     const email = localStorage.getItem("userEmail") || "";
 
+    // Redirect to login if missing essential data
     if (!storedRole || storedTabs.length === 0 || !userUid) {
       router.push("/");
       return;
@@ -43,6 +45,7 @@ export default function Dashboard() {
     setAllowedTabs(storedTabs);
     setUserEmail(email);
 
+    // Set first allowed tab as active initially
     if (storedTabs.length > 0) setActiveTab(storedTabs[0]);
 
     setLoading(false);
@@ -50,6 +53,7 @@ export default function Dashboard() {
 
   if (loading) return <p>Loading...</p>;
 
+  // Render content based on active tab key
   const renderTabContent = () => {
     switch (activeTab) {
       case "ASMESECTIONVIIIDIV1":
@@ -82,7 +86,6 @@ export default function Dashboard() {
         return <BkStressTab />;
       case "ASMEB31_3":
         return <ASMEB31_3Tab />;
-      // Add other tab cases here
       default:
         return <p>Select a tab to view content.</p>;
     }
@@ -101,7 +104,7 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className={styles.mainContent}>
-        {/* Sidebar */}
+        {/* Sidebar with tabs */}
         <aside className={styles.sidebar}>
           <h3>Features</h3>
           <ul className={styles.featuresList}>
@@ -113,7 +116,6 @@ export default function Dashboard() {
                     activeTab === tab ? styles.tabButtonActive : ""
                   }`}
                 >
-                  {/* You can map tab codes to friendly names here */}
                   {getTabDisplayName(tab)}
                 </button>
               </li>
@@ -121,7 +123,7 @@ export default function Dashboard() {
           </ul>
         </aside>
 
-        {/* Right Panel */}
+        {/* Main panel for selected tab */}
         <main className={styles.mainPanel}>{renderTabContent()}</main>
       </div>
 
@@ -133,7 +135,7 @@ export default function Dashboard() {
   );
 }
 
-// Helper function to convert tab keys to readable names
+// Helper: map tab keys to user-friendly names
 function getTabDisplayName(tabKey) {
   const map = {
     ASMESECTIONVIIIDIV1: "ASME Section VIII Div 1",
@@ -151,7 +153,6 @@ function getTabDisplayName(tabKey) {
     CRACKING_MECHANISM: "Cracking Mechanism Finder",
     BK_STRESS: "Stress Value",
     ASMEB31_3: "ASME B31.3 Process Piping",
-    // add more mappings as needed
   };
   return map[tabKey] || tabKey;
 }
