@@ -32,7 +32,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const script = document.createElement("script");
-      script.src = "/public/dashboard.html";
+      script.src = "/dashboard.html";
       script.defer = true;
       document.body.appendChild(script);
 
