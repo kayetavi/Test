@@ -30,7 +30,7 @@ export default function Dashboard() {
 
   return (
     <iframe
-      src="/dashboard.html"
+      src="public/dashboard.html"
       style={{
         width: "100%",
         height: "100vh",
