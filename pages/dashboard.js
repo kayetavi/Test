@@ -49,9 +49,14 @@ export default function Dashboard() {
   return (
     <div className={styles.container}>
       {/* Top Bar */}
-      <header className={styles.header}>
-        Welcome <span className={styles.userEmail}>{userEmail || "User"}</span>! Risk Based Inspection Dashboard
-      </header>
+     <header className={styles.header}>
+  Welcome{" "}
+  <span className={styles.userEmail}>
+    {userEmail ? userEmail.split("@")[0] : "User"}
+  </span>
+  ! Risk Based Inspection Dashboard
+</header>
+
 
       {/* Main Content */}
       <div className={styles.mainContent}>
