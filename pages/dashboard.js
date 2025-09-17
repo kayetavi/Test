@@ -11,13 +11,11 @@ export default function Dashboard() {
     const userUid = localStorage.getItem("userUid") || "";
     const email = localStorage.getItem("userEmail") || "";
 
-    // If not logged in or missing info, redirect to login
     if (!storedRole || storedTabs.length === 0 || !userUid) {
       router.push("/");
       return;
     }
 
-    // ✅ Expose user info to global for legacy HTML
     window.userData = {
       role: storedRole,
       allowedTabs: storedTabs,
@@ -30,7 +28,6 @@ export default function Dashboard() {
 
   if (loading) return <p>Loading...</p>;
 
-  // ✅ Embed your static HTML as iframe
   return (
     <iframe
       src="/dashboard.html"
