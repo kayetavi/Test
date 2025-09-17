@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase-config";
 
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
-// Import other tab components similarly...
+// import other tab components similarly...
 
 import styles from "../styles/Dashboard.module.css";
 
@@ -15,13 +15,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // For dropdown show/hide
   const [settingsDropdownVisible, setSettingsDropdownVisible] = useState(false);
-
-  // For expanded categories (store expanded category keys)
   const [expandedCategories, setExpandedCategories] = useState({});
-
-  // For modal visibility
   const [modalVisible, setModalVisible] = useState({
     cduVdu: false,
     processFlow: false,
@@ -32,26 +27,42 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    const storedRole = localStorage.getItem("userRole") || "";
-    const storedTabs = JSON.parse(localStorage.getItem("allowedTabs") || "[]");
-    const userUid = localStorage.getItem("userUid") || "";
-    const email = localStorage.getItem("userEmail") || "";
+    async function fetchUserAccess() {
+      const userUid = localStorage.getItem("userUid");
+      if (!userUid) {
+        router.push("/");
+        return;
+      }
 
-    if (!storedRole || storedTabs.length === 0 || !userUid) {
-      router.push("/");
-      return;
+      try {
+        const docRef = doc(db, "users", userUid);
+        const userDoc = await getDoc(docRef);
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setRole(userData.role || "");
+          setAllowedTabs(userData.allowedTabs || []);
+          setUserEmail(userData.email || "");
+
+          const firstTab = (userData.allowedTabs || []).find((tab) =>
+            Object.keys(tabContentMap).includes(tab)
+          );
+          if (firstTab) setActiveTab(firstTab);
+
+          setLoading(false);
+        } else {
+          console.error("User doc not found");
+          router.push("/");
+        }
+      } catch (err) {
+        console.error("Error fetching user data", err);
+        router.push("/");
+      }
     }
 
-    setRole(storedRole);
-    setAllowedTabs(storedTabs);
-    setUserEmail(email);
-
-    if (storedTabs.length > 0) setActiveTab(storedTabs[0]);
-
-    setLoading(false);
+    fetchUserAccess();
   }, [router]);
 
-  // Click outside dropdown to close
   useEffect(() => {
     function handleClickOutside() {
       if (settingsDropdownVisible) setSettingsDropdownVisible(false);
@@ -62,7 +73,6 @@ export default function Dashboard() {
 
   if (loading) return <p>Loading...</p>;
 
-  // Helper to toggle category/subcategory expansion
   function toggleCategory(key) {
     setExpandedCategories((prev) => ({
       ...prev,
@@ -70,18 +80,15 @@ export default function Dashboard() {
     }));
   }
 
-  // Hide welcome panel: we can simulate by no special "welcome" div, or keep a flag for it if needed
-
-  // Show/hide modals (example)
   function openModal(name) {
-    setModalVisible((prev) => ({
+    setModalVisible({
       cduVdu: false,
       processFlow: false,
       msp: false,
       h2u: false,
       [name]: true,
-    }));
-    setActiveTab(""); // clear active tab when modal opens
+    });
+    setActiveTab(""); // close tab content when opening modal
   }
 
   function closeModal(name) {
@@ -91,16 +98,31 @@ export default function Dashboard() {
     }));
   }
 
-  // Map of tab name => render function/component
+  function onMechanismClick(mech) {
+    if (mech.modal) {
+      openModal(mech.modal);
+    } else {
+      if (!allowedTabs.includes(mech.tab)) {
+        alert("Access denied: You don’t have permission to access this feature.");
+        return;
+      }
+      setActiveTab(mech.tab);
+      setModalVisible({
+        cduVdu: false,
+        processFlow: false,
+        msp: false,
+        h2u: false,
+      });
+    }
+  }
+
   const tabContentMap = {
     ASMESECTIONVIIIDIV1: <ASMECalculatorTab />,
-    // Add other tab components here:
+    // Add your other tabs here:
     // CRITERIA: <CriteriaTab />,
-    // CORROSION_RATE: <CorrosionRateTab />,
-    // etc...
+    // CORROSION_FULL: <CorrosionRateTab />,
   };
 
-  // Sidebar categories as React data with nested structure
   const categories = [
     {
       key: "api581",
@@ -147,16 +169,12 @@ export default function Dashboard() {
     {
       key: "crackingMechanism",
       label: "Cracking Mechanism Finder",
-      mechanisms: [
-        { key: "openFinder", label: "Open Finder", tab: "CRACKING_MECHANISM" },
-      ],
+      mechanisms: [{ key: "openFinder", label: "Open Finder", tab: "CRACKING_MECHANISM" }],
     },
     {
       key: "stressMaterialData",
       label: "Stress & Material Data",
-      mechanisms: [
-        { key: "stressValue", label: "Stress value", tab: "BK_STRESS" },
-      ],
+      mechanisms: [{ key: "stressValue", label: "Stress value", tab: "BK_STRESS" }],
     },
     {
       key: "processFlowDiagrams",
@@ -170,34 +188,14 @@ export default function Dashboard() {
     },
   ];
 
-  // When clicking mechanism:
-  // If it has modal, open modal; else set active tab
-
-  function onMechanismClick(mech) {
-    if (mech.modal) {
-      openModal(mech.modal);
-    } else {
-      setActiveTab(mech.tab);
-      // close all modals
-      setModalVisible({
-        cduVdu: false,
-        processFlow: false,
-        msp: false,
-        h2u: false,
-      });
-    }
-  }
-
   return (
     <div className={styles.container}>
-      {/* Top Bar */}
       <header className={styles.header}>
         Welcome{" "}
         <span className={styles.userEmail}>
           {userEmail ? userEmail.split("@")[0] : "User"}
         </span>
         ! Risk Based Inspection Dashboard
-
         <button
           id="settingsBtn"
           onClick={(e) => {
@@ -217,12 +215,9 @@ export default function Dashboard() {
         )}
       </header>
 
-      {/* Main Content */}
       <div className={styles.mainContent}>
-        {/* Sidebar */}
         <aside className={styles.sidebar}>
           <h3>Features</h3>
-
           <ul className={styles.categoryList} id="categoryList">
             {categories.map(({ key, label, mechanisms }) => (
               <li key={key}>
@@ -235,48 +230,62 @@ export default function Dashboard() {
                 </span>
                 {expandedCategories[key] && (
                   <ul className={styles.mechanisms}>
-                    {mechanisms.map((mech) =>
-                      mech.subMechanisms ? (
-                        <li key={mech.key}>
-                          <span
-                            className={styles.subcategory}
-                            onClick={() => toggleCategory(mech.key)}
-                            style={{ cursor: "pointer" }}
-                          >
-                            {mech.label}
-                          </span>
-                          {expandedCategories[mech.key] && (
-                            <ul className={styles.mechanisms}>
-                              {mech.subMechanisms.map((subMech) => (
-                                <li key={subMech.key}>
-                                  <a
-                                    href="#"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      onMechanismClick(subMech);
-                                    }}
-                                  >
-                                    {subMech.label}
-                                  </a>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ) : (
-                        <li key={mech.key}>
-                          <a
-                            href="#"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              onMechanismClick(mech);
-                            }}
-                          >
-                            {mech.label}
-                          </a>
-                        </li>
-                      )
-                    )}
+                    {mechanisms
+                      .filter((mech) => {
+                        if (mech.subMechanisms) {
+                          return mech.subMechanisms.some((sub) =>
+                            allowedTabs.includes(sub.tab)
+                          );
+                        } else if (mech.tab) {
+                          return allowedTabs.includes(mech.tab);
+                        } else {
+                          return true; // modal items
+                        }
+                      })
+                      .map((mech) =>
+                        mech.subMechanisms ? (
+                          <li key={mech.key}>
+                            <span
+                              className={styles.subcategory}
+                              onClick={() => toggleCategory(mech.key)}
+                              style={{ cursor: "pointer" }}
+                            >
+                              {mech.label}
+                            </span>
+                            {expandedCategories[mech.key] && (
+                              <ul className={styles.mechanisms}>
+                                {mech.subMechanisms
+                                  .filter((sub) => allowedTabs.includes(sub.tab))
+                                  .map((sub) => (
+                                    <li key={sub.key}>
+                                      <a
+                                        href="#"
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          onMechanismClick(sub);
+                                        }}
+                                      >
+                                        {sub.label}
+                                      </a>
+                                    </li>
+                                  ))}
+                              </ul>
+                            )}
+                          </li>
+                        ) : (
+                          <li key={mech.key}>
+                            <a
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                onMechanismClick(mech);
+                              }}
+                            >
+                              {mech.label}
+                            </a>
+                          </li>
+                        )
+                      )}
                   </ul>
                 )}
               </li>
@@ -284,15 +293,15 @@ export default function Dashboard() {
           </ul>
         </aside>
 
-        {/* Right Panel */}
         <main className={styles.mainPanel}>
-          {/* Render tab content based on activeTab */}
           {activeTab ? (
-            tabContentMap[activeTab] || (
-              <p>No content available for this tab yet.</p>
+            allowedTabs.includes(activeTab) ? (
+              tabContentMap[activeTab] || <p>No content available for this tab yet.</p>
+            ) : (
+              <p>Access denied: You do not have access to this tab.</p>
             )
           ) : (
-            <p>Select a tab to view content.</p>
+            <p>Select a tab or open a corrosion diagram.</p>
           )}
         </main>
       </div>
@@ -301,29 +310,24 @@ export default function Dashboard() {
       {modalVisible.cduVdu && (
         <div className={styles.modal}>
           <button onClick={() => closeModal("cduVdu")}>Close CDU/VDU Modal</button>
-          {/* Modal content and initCDUVDU() logic here */}
         </div>
       )}
       {modalVisible.processFlow && (
         <div className={styles.modal}>
           <button onClick={() => closeModal("processFlow")}>Close Process Flow Modal</button>
-          {/* Modal content */}
         </div>
       )}
       {modalVisible.msp && (
         <div className={styles.modal}>
           <button onClick={() => closeModal("msp")}>Close MSP Modal</button>
-          {/* Modal content */}
         </div>
       )}
       {modalVisible.h2u && (
         <div className={styles.modal}>
           <button onClick={() => closeModal("h2u")}>Close H2U Modal</button>
-          {/* Modal content */}
         </div>
       )}
 
-      {/* Footer */}
       <footer className={styles.footer}>
         © 2025 | Created by Avijit Kayet | About | Privacy Policy | Contact
       </footer>
