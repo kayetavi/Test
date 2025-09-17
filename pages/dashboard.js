@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-
-// Import all tab components
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
-import CriteriaTab from "../components/CriteriaTab";
-import CorrosionRateTab from "../components/CorrosionRateTab";
-import CorrosionFullTab from "../components/CorrosionFullTab";
-import FluidSelectorTab from "../components/FluidSelectorTab";
-import InventoryTab from "../components/InventoryTab";
+// import CriteriaTab from "../components/CriteriaTab";
+// import CorrosionRateTab from "../components/CorrosionRateTab";
+// import CorrosionFullTab from "../components/CorrosionFullTab";
+// import FluidSelectorTab from "../components/FluidSelectorTab";
+// import InventoryTab from "../components/InventoryTab";
 import RemainingLifeTab from "../components/RemainingLifeTab";
 import InspectionConfidenceTab from "../components/InspectionConfidenceTab";
 import ToxicCalculationTab from "../components/ToxicCalculationTab";
@@ -29,13 +27,11 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    // Load user info and permissions from localStorage
     const storedRole = localStorage.getItem("userRole") || "";
     const storedTabs = JSON.parse(localStorage.getItem("allowedTabs") || "[]");
     const userUid = localStorage.getItem("userUid") || "";
     const email = localStorage.getItem("userEmail") || "";
 
-    // Redirect to login if missing essential data
     if (!storedRole || storedTabs.length === 0 || !userUid) {
       router.push("/");
       return;
@@ -45,7 +41,6 @@ export default function Dashboard() {
     setAllowedTabs(storedTabs);
     setUserEmail(email);
 
-    // Set first allowed tab as active initially
     if (storedTabs.length > 0) setActiveTab(storedTabs[0]);
 
     setLoading(false);
@@ -53,11 +48,11 @@ export default function Dashboard() {
 
   if (loading) return <p>Loading...</p>;
 
-  // Render content based on active tab key
   const renderTabContent = () => {
     switch (activeTab) {
       case "ASMESECTIONVIIIDIV1":
         return <ASMECalculatorTab />;
+      /*
       case "CRITERIA_OF_FINDING":
         return <CriteriaTab />;
       case "CORROSION_RATE_ESTIMATOR":
@@ -68,6 +63,7 @@ export default function Dashboard() {
         return <FluidSelectorTab />;
       case "INVENTORY_CALCULATOR":
         return <InventoryTab />;
+      */
       case "REMAINING_LIFE":
         return <RemainingLifeTab />;
       case "INSPECTION_CONFIDENCE":
@@ -104,7 +100,7 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className={styles.mainContent}>
-        {/* Sidebar with tabs */}
+        {/* Sidebar */}
         <aside className={styles.sidebar}>
           <h3>Features</h3>
           <ul className={styles.featuresList}>
@@ -123,7 +119,7 @@ export default function Dashboard() {
           </ul>
         </aside>
 
-        {/* Main panel for selected tab */}
+        {/* Right Panel */}
         <main className={styles.mainPanel}>{renderTabContent()}</main>
       </div>
 
@@ -135,7 +131,7 @@ export default function Dashboard() {
   );
 }
 
-// Helper: map tab keys to user-friendly names
+// Helper function to convert tab keys to readable names
 function getTabDisplayName(tabKey) {
   const map = {
     ASMESECTIONVIIIDIV1: "ASME Section VIII Div 1",
