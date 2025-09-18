@@ -4,6 +4,7 @@ import { db } from "../firebase-config";
 
 // Import all tab components
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
+/*
 import ThicknessMonitoringTab from "../components/ThicknessMonitoringTab";
 import FAAReleaseRateTab from "../components/FAAReleaseRateTab";
 import InventoryCalculatorTab from "../components/InventoryCalculatorTab";
@@ -17,6 +18,7 @@ import QPofCalculatorTab from "../components/QPofCalculatorTab";
 import CrackingMechanismTab from "../components/CrackingMechanismTab";
 import StressMaterialTab from "../components/StressMaterialTab";
 import ASMEB31_3Tab from "../components/ASMEB31_3Tab";
+*/
 
 import styles from "../styles/Dashboard.module.css";
 
@@ -55,6 +57,7 @@ export default function Dashboard() {
     switch (activeTab) {
       case "ASMESECTIONVIIIDIV1":
         return <ASMECalculatorTab />;
+      /*
       case "THICKNESSMONITORING":
         return <ThicknessMonitoringTab />;
       case "FAA_RELEASE_RATE":
@@ -81,6 +84,7 @@ export default function Dashboard() {
         return <StressMaterialTab />;
       case "ASMEB31_3":
         return <ASMEB31_3Tab />;
+      */
       default:
         return <p>Select a tab to view content.</p>;
     }
