@@ -152,7 +152,8 @@ export default function ProcessPipingCalculator() {
           <label>High-Temperature Service?</label>
           <select value={highTemp} onChange={(e) => toggleWeldFactor(e.target.value)}>
             <option value="no">No</option>
-            <option value="yes">Yes (T > 427°C)</option>
+            <option value="yes">Yes (T &gt; 427{"\u00B0"}C)</option>
+
           </select>
 
           {highTemp === "yes" && (
@@ -216,7 +217,14 @@ export default function ProcessPipingCalculator() {
           </div>
           <div className={styles.col}>
             <label>Material Standard:</label>
-            <select value={materialStd} onChange={loadMillTolerance}>
+           <select
+  value={materialStd}
+  onChange={(e) => {
+    setMaterialStd(e.target.value);
+    loadMillTolerance();
+  }}
+>
+
               <option value="">--Select--</option>
               <option value="A53">A53</option>
               <option value="A106">A106</option>
