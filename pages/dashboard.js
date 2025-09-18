@@ -1,19 +1,24 @@
-// pages/dashboard.js
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
+import { db } from "../firebase-config";
+
+// Import all tab components
+import ASMECalculatorTab from "../components/ASMECalculatorTab";
+import ThicknessMonitoringTab from "../components/ThicknessMonitoringTab";
+import FAAReleaseRateTab from "../components/FAAReleaseRateTab";
+import InventoryCalculatorTab from "../components/InventoryCalculatorTab";
+import ProcessPipingCalculator from "../components/ProcessPipingCalculator";
+import CorrosionCalculationTab from "../components/CorrosionCalculationTab";
+import ToxicCalculationTab from "../components/ToxicCalculationTab";
+import RemainingLifeTab from "../components/RemainingLifeTab";
+import InspectionConfidenceTab from "../components/InspectionConfidenceTab";
+import CofCalculatorTab from "../components/CofCalculatorTab";
+import QPofCalculatorTab from "../components/QPofCalculatorTab";
+import CrackingMechanismTab from "../components/CrackingMechanismTab";
+import StressMaterialTab from "../components/StressMaterialTab";
+import ASMEB31_3Tab from "../components/ASMEB31_3Tab";
+
 import styles from "../styles/Dashboard.module.css";
-
-// ✅ Dynamic imports to prevent SSR issues
-const ASMECalculatorTab = dynamic(
-  () => import("../components/ASMECalculatorTab"),
-  { ssr: false }
-);
-
-const ProcessPipingCalculator = dynamic(
-  () => import("../components/ProcessPipingCalculator"),
-  { ssr: false }
-);
 
 export default function Dashboard() {
   const [role, setRole] = useState("");
@@ -24,9 +29,6 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    // ✅ Only access localStorage on client
-    if (typeof window === "undefined") return;
-
     const storedRole = localStorage.getItem("userRole") || "";
     const storedTabs = JSON.parse(localStorage.getItem("allowedTabs") || "[]");
     const userUid = localStorage.getItem("userUid") || "";
@@ -48,18 +50,37 @@ export default function Dashboard() {
 
   if (loading) return <p>Loading...</p>;
 
-  // ✅ Human-readable tab labels
-  const tabLabels = {
-    ASMESECTIONVIIIDIV1: "ASME Section VIII Div 1",
-    PROCESS_PIPING_THICKNESS: "Process Piping Calculator",
-  };
-
+  // Function to render content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
       case "ASMESECTIONVIIIDIV1":
         return <ASMECalculatorTab />;
-      case "PROCESS_PIPING_THICKNESS":
+      case "THICKNESSMONITORING":
+        return <ThicknessMonitoringTab />;
+      case "FAA_RELEASE_RATE":
+        return <FAAReleaseRateTab />;
+      case "INVENTORY_CALCULATOR":
+        return <InventoryCalculatorTab />;
+      case "PROCESS_PIPING":
         return <ProcessPipingCalculator />;
+      case "CORROSION_CALCULATION":
+        return <CorrosionCalculationTab />;
+      case "TOXIC_CALCULATION":
+        return <ToxicCalculationTab />;
+      case "REMAINING_LIFE":
+        return <RemainingLifeTab />;
+      case "INSPECTION_CONFIDENCE":
+        return <InspectionConfidenceTab />;
+      case "COF_CALCULATOR":
+        return <CofCalculatorTab />;
+      case "QPOF_CALCULATOR":
+        return <QPofCalculatorTab />;
+      case "CRACKING_MECHANISM":
+        return <CrackingMechanismTab />;
+      case "STRESS_MATERIAL":
+        return <StressMaterialTab />;
+      case "ASMEB31_3":
+        return <ASMEB31_3Tab />;
       default:
         return <p>Select a tab to view content.</p>;
     }
@@ -71,7 +92,7 @@ export default function Dashboard() {
       <header className={styles.header}>
         Welcome{" "}
         <span className={styles.userEmail}>
-          {userEmail?.split("@")[0] || "User"}
+          {userEmail ? userEmail.split("@")[0] : "User"}
         </span>
         ! Risk Based Inspection Dashboard
       </header>
@@ -90,7 +111,7 @@ export default function Dashboard() {
                     activeTab === tab ? styles.tabButtonActive : ""
                   }`}
                 >
-                  {tabLabels[tab] || tab}
+                  {tab.replace(/_/g, " ")}
                 </button>
               </li>
             ))}
