@@ -1,11 +1,19 @@
+// pages/dashboard.js
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase-config";
-
-import ASMECalculatorTab from "../components/ASMECalculatorTab";
-import ProcessPipingCalculator from "../components/ProcessPipingCalculator"; // ✅ Import your new component
+import dynamic from "next/dynamic";
 import styles from "../styles/Dashboard.module.css";
+
+// ✅ Dynamic imports to prevent SSR issues
+const ASMECalculatorTab = dynamic(
+  () => import("../components/ASMECalculatorTab"),
+  { ssr: false }
+);
+
+const ProcessPipingCalculator = dynamic(
+  () => import("../components/ProcessPipingCalculator"),
+  { ssr: false }
+);
 
 export default function Dashboard() {
   const [role, setRole] = useState("");
@@ -16,6 +24,9 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
+    // ✅ Only access localStorage on client
+    if (typeof window === "undefined") return;
+
     const storedRole = localStorage.getItem("userRole") || "";
     const storedTabs = JSON.parse(localStorage.getItem("allowedTabs") || "[]");
     const userUid = localStorage.getItem("userUid") || "";
@@ -37,14 +48,12 @@ export default function Dashboard() {
 
   if (loading) return <p>Loading...</p>;
 
-  // ✅ Add readable labels for tabs
+  // ✅ Human-readable tab labels
   const tabLabels = {
     ASMESECTIONVIIIDIV1: "ASME Section VIII Div 1",
     PROCESS_PIPING_THICKNESS: "Process Piping Calculator",
-    // Add more labels here if you add more tabs
   };
 
-  // ✅ Add support for rendering the new tab
   const renderTabContent = () => {
     switch (activeTab) {
       case "ASMESECTIONVIIIDIV1":
@@ -62,7 +71,7 @@ export default function Dashboard() {
       <header className={styles.header}>
         Welcome{" "}
         <span className={styles.userEmail}>
-          {userEmail ? userEmail.split("@")[0] : "User"}
+          {userEmail?.split("@")[0] || "User"}
         </span>
         ! Risk Based Inspection Dashboard
       </header>
