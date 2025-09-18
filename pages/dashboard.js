@@ -4,7 +4,8 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase-config";
 
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
-import styles from "../styles/Dashboard.module.css"; // <-- import css module
+import ProcessPipingCalculator from "../components/ProcessPipingCalculator"; // ✅ Import your new component
+import styles from "../styles/Dashboard.module.css";
 
 export default function Dashboard() {
   const [role, setRole] = useState("");
@@ -36,11 +37,20 @@ export default function Dashboard() {
 
   if (loading) return <p>Loading...</p>;
 
+  // ✅ Add readable labels for tabs
+  const tabLabels = {
+    ASMESECTIONVIIIDIV1: "ASME Section VIII Div 1",
+    PROCESS_PIPING_THICKNESS: "Process Piping Calculator",
+    // Add more labels here if you add more tabs
+  };
+
+  // ✅ Add support for rendering the new tab
   const renderTabContent = () => {
     switch (activeTab) {
       case "ASMESECTIONVIIIDIV1":
         return <ASMECalculatorTab />;
-      // Add other cases here
+      case "PROCESS_PIPING_THICKNESS":
+        return <ProcessPipingCalculator />;
       default:
         return <p>Select a tab to view content.</p>;
     }
@@ -49,14 +59,13 @@ export default function Dashboard() {
   return (
     <div className={styles.container}>
       {/* Top Bar */}
-     <header className={styles.header}>
-  Welcome{" "}
-  <span className={styles.userEmail}>
-    {userEmail ? userEmail.split("@")[0] : "User"}
-  </span>
-  ! Risk Based Inspection Dashboard
-</header>
-
+      <header className={styles.header}>
+        Welcome{" "}
+        <span className={styles.userEmail}>
+          {userEmail ? userEmail.split("@")[0] : "User"}
+        </span>
+        ! Risk Based Inspection Dashboard
+      </header>
 
       {/* Main Content */}
       <div className={styles.mainContent}>
@@ -68,9 +77,11 @@ export default function Dashboard() {
               <li key={tab}>
                 <button
                   onClick={() => setActiveTab(tab)}
-                  className={`${styles.tabButton} ${activeTab === tab ? styles.tabButtonActive : ""}`}
+                  className={`${styles.tabButton} ${
+                    activeTab === tab ? styles.tabButtonActive : ""
+                  }`}
                 >
-                  {tab}
+                  {tabLabels[tab] || tab}
                 </button>
               </li>
             ))}
