@@ -4,6 +4,7 @@ import { db } from "../firebase-config";
 
 // Import all tab components
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
+import InventoryCalculatorTab from "../components/InventoryCalculatorTab";
 /*
 import ThicknessMonitoringTab from "../components/ThicknessMonitoringTab";
 import FAAReleaseRateTab from "../components/FAAReleaseRateTab";
@@ -57,6 +58,8 @@ export default function Dashboard() {
     switch (activeTab) {
       case "ASMESECTIONVIIIDIV1":
         return <ASMECalculatorTab />;
+           case "INVENTORY_CALCULATOR":
+        return <InventoryCalculatorTab />;
       /*
       case "THICKNESSMONITORING":
         return <ThicknessMonitoringTab />;
