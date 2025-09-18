@@ -8,20 +8,20 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // optional loading state
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(""); // Reset previous error
+    setError("");
     setLoading(true);
 
     try {
-      // 1️⃣ Firebase Authentication
+      // Firebase Auth
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      // 2️⃣ Fetch user role and allowed tabs from Firestore
+      // Firestore: fetch user role
       const docRef = doc(db, "users_roles", uid);
       const docSnap = await getDoc(docRef);
 
@@ -36,21 +36,20 @@ export default function Home() {
           return;
         }
 
-        // 3️⃣ Save data in localStorage
-        // 3️⃣ Save data in localStorage
-try {
-  localStorage.setItem("userUid", uid);
-  localStorage.setItem("userRole", role);
-  localStorage.setItem("allowedTabs", JSON.stringify(allowedTabs));
-  localStorage.setItem("userEmail", userCredential.user.email); // <-- Ye line add karo
-} catch (err) {
-  console.error("Error saving to localStorage:", err);
-  setError("Failed to save user data locally.");
-  setLoading(false);
-  return;
-}
+        // Save in localStorage
+        try {
+          localStorage.setItem("userUid", uid);
+          localStorage.setItem("userRole", role);
+          localStorage.setItem("allowedTabs", JSON.stringify(allowedTabs));
+          localStorage.setItem("userEmail", userCredential.user.email);
+        } catch (err) {
+          console.error("Error saving to localStorage:", err);
+          setError("Failed to save user data locally.");
+          setLoading(false);
+          return;
+        }
 
-        // 4️⃣ Redirect to dashboard
+        // Redirect
         router.push("/dashboard");
       } else {
         setError("User role not found in Firestore.");
@@ -64,31 +63,51 @@ try {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        /><br /><br />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">Login</h1>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        /><br /><br />
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+          <div>
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+
+        <p className="text-sm text-gray-600 text-center mt-6">
+          Don’t have an account?{" "}
+          <a href="/signup" className="text-blue-600 hover:underline">
+            Sign up
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
