@@ -1,6 +1,5 @@
 import { useState } from "react";
-import styles from "../styles/ProcessPiping.module.css"; // optional CSS module
-
+// import styles from "../styles/ProcessPiping.module.css"; // TEMPORARILY DISABLED
 export default function ProcessPipingCalculator() {
   // 🔹 States
   const [pressure, setPressure] = useState("");
