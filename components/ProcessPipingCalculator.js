@@ -80,7 +80,7 @@ export default function ProcessPipingCalculator() {
         highTemp,
       };
 
-      const response = await fetch("/api/process-piping-calc", {
+      const response = await fetch("/api/ProcessPipingCalculator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
