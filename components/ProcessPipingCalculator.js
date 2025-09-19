@@ -100,12 +100,12 @@ export default function ProcessPipingCalculator() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className="container"
       <h2>Process Piping Thickness Calculator</h2>
 
       {/* Row 1: Design Pressure + Unit */}
-      <div className={styles.row}>
-        <div className={styles.col}>
+      <div className="row"
+        <div className="col"
           <label>Design Pressure (P):</label>
           <input
             type="number"
