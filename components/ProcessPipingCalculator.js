@@ -1,7 +1,7 @@
 import { useState } from "react";
 // import styles from "../styles/ProcessPiping.module.css"; // TEMPORARILY DISABLED
+
 export default function ProcessPipingCalculator() {
-  // 🔹 States
   const [pressure, setPressure] = useState("");
   const [pressureUnit, setPressureUnit] = useState("");
   const [stress, setStress] = useState("");
@@ -21,11 +21,7 @@ export default function ProcessPipingCalculator() {
   const [result, setResult] = useState("--");
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Event Handlers
-
-  // Example updateYDropdown function for demonstration
   const updateYDropdown = () => {
-    // This can be dynamic based on material, here just example values:
     if (yMaterial === "ferritic") {
       setYFactor("0.4");
     } else if (yMaterial === "austenitic") {
@@ -44,9 +40,7 @@ export default function ProcessPipingCalculator() {
   const toggleMillToleranceSection = (value) => setIncludeMillTol(value);
 
   const loadMillTolerance = () => {
-    // Example static logic - replace with real logic or API call if needed
     if (materialStd === "A53" && nominalThickness) {
-      // Just a dummy calculation for demo
       setAutoMillTol((parseFloat(nominalThickness) * 0.1).toFixed(2));
     } else if (materialStd === "A106" && nominalThickness) {
       setAutoMillTol((parseFloat(nominalThickness) * 0.15).toFixed(2));
@@ -60,7 +54,6 @@ export default function ProcessPipingCalculator() {
     setResult("--");
 
     try {
-      // Build request payload with proper parsing
       const payload = {
         pressure: parseFloat(pressure),
         pressureUnit,
@@ -99,37 +92,37 @@ export default function ProcessPipingCalculator() {
     setLoading(false);
   };
 
- return (
-  <div className="container">
-    <h2>Process Piping Thickness Calculator</h2>
+  return (
+    <div className="container">
+      <h2>Process Piping Thickness Calculator</h2>
 
-    {/* Row 1: Design Pressure + Unit */}
-    <div className="row">
-      <div className="col">
-        <label>Design Pressure (P):</label>
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Enter Pressure"
-          value={pressure}
-          onChange={(e) => setPressure(e.target.value)}
-        />
+      {/* Row 1 */}
+      <div className="row">
+        <div className="col">
+          <label>Design Pressure (P):</label>
+          <input
+            type="number"
+            step="0.01"
+            placeholder="Enter Pressure"
+            value={pressure}
+            onChange={(e) => setPressure(e.target.value)}
+          />
+        </div>
+        <div className="col">
+          <label>Unit:</label>
+          <select value={pressureUnit} onChange={(e) => setPressureUnit(e.target.value)}>
+            <option value="">-- Select Unit --</option>
+            <option value="MPa">MPa</option>
+            <option value="kgcm2">kg/cm²</option>
+            <option value="bar">bar</option>
+            <option value="psi">psi</option>
+          </select>
+        </div>
       </div>
-      <div className="col">
-        <label>Unit:</label>
-        <select value={pressureUnit} onChange={(e) => setPressureUnit(e.target.value)}>
-          <option value="">-- Select Unit --</option>
-          <option value="MPa">MPa</option>
-          <option value="kgcm2">kg/cm²</option>
-          <option value="bar">bar</option>
-          <option value="psi">psi</option>
-        </select>
-      </div>
-    </div>
 
-      {/* Row 2: Allowable Stress + Unit */}
-      <div className={styles.row}>
-        <div className={styles.col}>
+      {/* Row 2 */}
+      <div className="row">
+        <div className="col">
           <label>Allowable Stress (S):</label>
           <input
             type="number"
@@ -139,7 +132,7 @@ export default function ProcessPipingCalculator() {
             onChange={(e) => setStress(e.target.value)}
           />
         </div>
-        <div className={styles.col}>
+        <div className="col">
           <label>Unit:</label>
           <select value={stressUnit} onChange={(e) => setStressUnit(e.target.value)}>
             <option value="">-- Select Unit --</option>
@@ -151,19 +144,19 @@ export default function ProcessPipingCalculator() {
         </div>
       </div>
 
-      {/* Row 3: Nominal Diameter + Weld Efficiency */}
-      <div className={styles.row}>
-        <div className={styles.col}>
+      {/* Row 3 */}
+      <div className="row">
+        <div className="col">
           <label>Nominal Pipe Size (NPS):</label>
           <select value={diameter} onChange={(e) => setDiameter(e.target.value)}>
             <option value="">-- Select OD Size --</option>
             <option value="21.3">NPS 1/2" - 21.3 mm</option>
             <option value="26.7">NPS 3/4" - 26.7 mm</option>
             <option value="33.4">NPS 1" - 33.4 mm</option>
-            {/* Add all other options */}
+            {/* Add other options */}
           </select>
         </div>
-        <div className={styles.col}>
+        <div className="col">
           <label>Weld Joint Efficiency (E):</label>
           <select value={efficiency} onChange={(e) => setEfficiency(e.target.value)}>
             <option value="">-- Select Efficiency --</option>
@@ -175,9 +168,9 @@ export default function ProcessPipingCalculator() {
         </div>
       </div>
 
-      {/* Row 4: Y Material + Y Factor */}
-      <div className={styles.row}>
-        <div className={styles.col}>
+      {/* Row 4 */}
+      <div className="row">
+        <div className="col">
           <label>Y Factor Material:</label>
           <select
             value={yMaterial}
@@ -194,7 +187,7 @@ export default function ProcessPipingCalculator() {
             <option value="other">Other Ductile Metals</option>
           </select>
         </div>
-        <div className={styles.col}>
+        <div className="col">
           <label>Y Factor (Design Temperature):</label>
           <select value={yFactor} onChange={(e) => setYFactor(e.target.value)}>
             <option value="">-- Select Temperature --</option>
@@ -203,13 +196,13 @@ export default function ProcessPipingCalculator() {
         </div>
       </div>
 
-      {/* Row 5: High Temp Service + Corrosion Allowance */}
-      <div className={styles.row}>
-        <div className={styles.col}>
+      {/* Row 5 */}
+      <div className="row">
+        <div className="col">
           <label>High-Temperature Service?</label>
           <select value={highTemp} onChange={(e) => toggleWeldFactor(e.target.value)}>
             <option value="no">No</option>
-            <option value="yes">Yes (T &gt; 427{"\u00B0"}C)</option>
+            <option value="yes">Yes (T &gt; 427°C)</option>
           </select>
 
           {highTemp === "yes" && (
@@ -224,7 +217,7 @@ export default function ProcessPipingCalculator() {
           )}
         </div>
 
-        <div className={styles.col}>
+        <div className="col">
           <label>Include Corrosion Allowance?</label>
           <select value={includeCA} onChange={(e) => toggleCABox(e.target.value)}>
             <option value="">--Select--</option>
@@ -235,8 +228,8 @@ export default function ProcessPipingCalculator() {
       </div>
 
       {includeCA === "yes" && (
-        <div className={styles.row}>
-          <div className={styles.col}>
+        <div className="row">
+          <div className="col">
             <label>Corrosion Allowance (CA) [mm]:</label>
             <input
               type="number"
@@ -249,8 +242,8 @@ export default function ProcessPipingCalculator() {
       )}
 
       {/* Mill Tolerance */}
-      <div className={styles.row}>
-        <div className={styles.col}>
+      <div className="row">
+        <div className="col">
           <label>Include Mill Tolerance?</label>
           <select value={includeMillTol} onChange={(e) => toggleMillToleranceSection(e.target.value)}>
             <option value="">--Select--</option>
@@ -261,8 +254,8 @@ export default function ProcessPipingCalculator() {
       </div>
 
       {includeMillTol === "yes" && (
-        <div className={styles.row}>
-          <div className={styles.col}>
+        <div className="row">
+          <div className="col">
             <label>Nominal Thickness (mm):</label>
             <input
               type="number"
@@ -271,7 +264,7 @@ export default function ProcessPipingCalculator() {
               onChange={(e) => setNominalThickness(e.target.value)}
             />
           </div>
-          <div className={styles.col}>
+          <div className="col">
             <label>Material Standard:</label>
             <select
               value={materialStd}
@@ -286,7 +279,7 @@ export default function ProcessPipingCalculator() {
               {/* Add all other options */}
             </select>
           </div>
-          <div className={styles.col}>
+          <div className="col">
             <label>Auto Mill Tolerance:</label>
             <input type="text" value={autoMillTol} readOnly />
           </div>
@@ -302,8 +295,8 @@ export default function ProcessPipingCalculator() {
       {loading && <p>Calculating...</p>}
 
       {/* Result */}
-      <div className={styles.row}>
-        <div className={styles.col}>
+      <div className="row">
+        <div className="col">
           <label>Required Thickness:</label>
           <div>{result}</div>
         </div>
