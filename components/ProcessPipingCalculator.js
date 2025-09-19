@@ -99,33 +99,33 @@ export default function ProcessPipingCalculator() {
     setLoading(false);
   };
 
-  return (
-    <div className="container"
-      <h2>Process Piping Thickness Calculator</h2>
+ return (
+  <div className="container">
+    <h2>Process Piping Thickness Calculator</h2>
 
-      {/* Row 1: Design Pressure + Unit */}
-      <div className="row"
-        <div className="col"
-          <label>Design Pressure (P):</label>
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Enter Pressure"
-            value={pressure}
-            onChange={(e) => setPressure(e.target.value)}
-          />
-        </div>
-        <div className={styles.col}>
-          <label>Unit:</label>
-          <select value={pressureUnit} onChange={(e) => setPressureUnit(e.target.value)}>
-            <option value="">-- Select Unit --</option>
-            <option value="MPa">MPa</option>
-            <option value="kgcm2">kg/cm²</option>
-            <option value="bar">bar</option>
-            <option value="psi">psi</option>
-          </select>
-        </div>
+    {/* Row 1: Design Pressure + Unit */}
+    <div className="row">
+      <div className="col">
+        <label>Design Pressure (P):</label>
+        <input
+          type="number"
+          step="0.01"
+          placeholder="Enter Pressure"
+          value={pressure}
+          onChange={(e) => setPressure(e.target.value)}
+        />
       </div>
+      <div className="col">
+        <label>Unit:</label>
+        <select value={pressureUnit} onChange={(e) => setPressureUnit(e.target.value)}>
+          <option value="">-- Select Unit --</option>
+          <option value="MPa">MPa</option>
+          <option value="kgcm2">kg/cm²</option>
+          <option value="bar">bar</option>
+          <option value="psi">psi</option>
+        </select>
+      </div>
+    </div>
 
       {/* Row 2: Allowable Stress + Unit */}
       <div className={styles.row}>
