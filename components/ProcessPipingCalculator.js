@@ -23,17 +23,17 @@ export default function ProcessPipingCalculator() {
   const [loading, setLoading] = useState(false);
 
   // 🔹 Event Handlers
-  const calculateThickness = () => {
-    setLoading(true);
-    // 🔹 Add calculation logic here
-    setTimeout(() => {
-      setResult("Calculated Thickness Here");
-      setLoading(false);
-    }, 1000);
-  };
 
+  // Example updateYDropdown function for demonstration
   const updateYDropdown = () => {
-    // 🔹 Update Y factor based on selected material
+    // This can be dynamic based on material, here just example values:
+    if (yMaterial === "ferritic") {
+      setYFactor("0.4");
+    } else if (yMaterial === "austenitic") {
+      setYFactor("0.3");
+    } else {
+      setYFactor("");
+    }
   };
 
   const toggleWeldFactor = (value) => {
@@ -43,9 +43,61 @@ export default function ProcessPipingCalculator() {
 
   const toggleCABox = (value) => setIncludeCA(value);
   const toggleMillToleranceSection = (value) => setIncludeMillTol(value);
+
   const loadMillTolerance = () => {
-    // 🔹 Logic to auto-load mill tolerance
-    setAutoMillTol("Auto-calculated Tolerance");
+    // Example static logic - replace with real logic or API call if needed
+    if (materialStd === "A53" && nominalThickness) {
+      // Just a dummy calculation for demo
+      setAutoMillTol((parseFloat(nominalThickness) * 0.1).toFixed(2));
+    } else if (materialStd === "A106" && nominalThickness) {
+      setAutoMillTol((parseFloat(nominalThickness) * 0.15).toFixed(2));
+    } else {
+      setAutoMillTol("");
+    }
+  };
+
+  const calculateThickness = async () => {
+    setLoading(true);
+    setResult("--");
+
+    try {
+      // Build request payload with proper parsing
+      const payload = {
+        pressure: parseFloat(pressure),
+        pressureUnit,
+        stress: parseFloat(stress),
+        stressUnit,
+        diameter: parseFloat(diameter),
+        efficiency: parseFloat(efficiency),
+        yMaterial,
+        yFactor,
+        wFactor: parseFloat(wFactor),
+        corrosionAllowance: includeCA === "yes" ? parseFloat(corrosionAllowance) : 0,
+        includeMillTol: includeMillTol === "yes",
+        nominalThickness: includeMillTol === "yes" ? parseFloat(nominalThickness) : 0,
+        materialStd,
+        autoMillTol: includeMillTol === "yes" ? parseFloat(autoMillTol) || 0 : 0,
+        highTemp,
+      };
+
+      const response = await fetch("/api/process-piping-calc", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setResult(data.thickness ? `${data.thickness} mm` : "No result");
+      } else {
+        setResult("Error: " + (data.message || "Calculation failed"));
+      }
+    } catch (error) {
+      setResult("Error: " + error.message);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -128,7 +180,13 @@ export default function ProcessPipingCalculator() {
       <div className={styles.row}>
         <div className={styles.col}>
           <label>Y Factor Material:</label>
-          <select value={yMaterial} onChange={(e) => { setYMaterial(e.target.value); updateYDropdown(); }}>
+          <select
+            value={yMaterial}
+            onChange={(e) => {
+              setYMaterial(e.target.value);
+              updateYDropdown();
+            }}
+          >
             <option value="">-- Select Material --</option>
             <option value="ferritic">Ferritic Steel</option>
             <option value="austenitic">Austenitic Stainless Steel</option>
@@ -141,7 +199,7 @@ export default function ProcessPipingCalculator() {
           <label>Y Factor (Design Temperature):</label>
           <select value={yFactor} onChange={(e) => setYFactor(e.target.value)}>
             <option value="">-- Select Temperature --</option>
-            {/* Populate dynamically */}
+            {/* Populate dynamically if needed */}
           </select>
         </div>
       </div>
@@ -153,7 +211,6 @@ export default function ProcessPipingCalculator() {
           <select value={highTemp} onChange={(e) => toggleWeldFactor(e.target.value)}>
             <option value="no">No</option>
             <option value="yes">Yes (T &gt; 427{"\u00B0"}C)</option>
-
           </select>
 
           {highTemp === "yes" && (
@@ -217,14 +274,13 @@ export default function ProcessPipingCalculator() {
           </div>
           <div className={styles.col}>
             <label>Material Standard:</label>
-           <select
-  value={materialStd}
-  onChange={(e) => {
-    setMaterialStd(e.target.value);
-    loadMillTolerance();
-  }}
->
-
+            <select
+              value={materialStd}
+              onChange={(e) => {
+                setMaterialStd(e.target.value);
+                loadMillTolerance();
+              }}
+            >
               <option value="">--Select--</option>
               <option value="A53">A53</option>
               <option value="A106">A106</option>
@@ -239,7 +295,7 @@ export default function ProcessPipingCalculator() {
       )}
 
       {/* Calculate Button */}
-      <button type="button" onClick={calculateThickness}>
+      <button type="button" onClick={calculateThickness} disabled={loading}>
         Calculate
       </button>
 
