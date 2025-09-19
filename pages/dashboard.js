@@ -5,11 +5,12 @@ import { db } from "../firebase-config";
 // Import all tab components
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
 import InventoryCalculatorTab from "../components/InventoryCalculatorTab";
+import ProcessPipingCalculator from "../components/ProcessPipingCalculator";
 /*
 import ThicknessMonitoringTab from "../components/ThicknessMonitoringTab";
 import FAAReleaseRateTab from "../components/FAAReleaseRateTab";
 import InventoryCalculatorTab from "../components/InventoryCalculatorTab";
-import ProcessPipingCalculator from "../components/ProcessPipingCalculator";
+
 import CorrosionCalculationTab from "../components/CorrosionCalculationTab";
 import ToxicCalculationTab from "../components/ToxicCalculationTab";
 import RemainingLifeTab from "../components/RemainingLifeTab";
@@ -60,6 +61,8 @@ export default function Dashboard() {
         return <ASMECalculatorTab />;
            case "INVENTORY_CALCULATOR":
         return <InventoryCalculatorTab />;
+          case "PROCESS_PIPING":
+        return <ProcessPipingCalculator />;
       /*
       case "THICKNESSMONITORING":
         return <ThicknessMonitoringTab />;
@@ -67,8 +70,7 @@ export default function Dashboard() {
         return <FAAReleaseRateTab />;
       case "INVENTORY_CALCULATOR":
         return <InventoryCalculatorTab />;
-      case "PROCESS_PIPING":
-        return <ProcessPipingCalculator />;
+      
       case "CORROSION_CALCULATION":
         return <CorrosionCalculationTab />;
       case "TOXIC_CALCULATION":
