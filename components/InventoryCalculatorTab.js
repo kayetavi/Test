@@ -1,4 +1,3 @@
-// components/InventoryCalculatorTab.js
 import { useState } from "react";
 import useInventoryCalculator from "../hooks/useInventoryCalculator";
 
@@ -38,7 +37,8 @@ export default function InventoryCalculatorTab() {
   } = state;
 
   return (
-    <div className="inventory-tab">
+    <div className="inventory-tab space-y-4">
+      {/* ---------------- Equipment Shape ---------------- */}
       <div>
         <label>Select Equipment Shape:</label>
         <select value={shape} onChange={handleShapeChange}>
@@ -48,6 +48,7 @@ export default function InventoryCalculatorTab() {
         </select>
       </div>
 
+      {/* ---------------- Phase Selection ---------------- */}
       {shape && (
         <div>
           <label>Select Fluid Phase:</label>
@@ -60,21 +61,41 @@ export default function InventoryCalculatorTab() {
         </div>
       )}
 
+      {/* ---------------- Dimensions ---------------- */}
       {phase && phase !== "vapor" && (
-        <div className="dimensions">
+        <div className="dimensions space-y-2">
           <div>
             <label>Diameter (ID):</label>
-            <input type="number" name="diameter" value={diameter} onChange={handleInputChange} />
-            <select name="diameterUnit" value={diameterUnit} onChange={handleInputChange}>
+            <input
+              type="number"
+              name="diameter"
+              value={diameter}
+              onChange={handleInputChange}
+            />
+            <select
+              name="diameterUnit"
+              value={diameterUnit}
+              onChange={handleInputChange}
+            >
               <option value="1">m</option>
               <option value="0.01">cm</option>
               <option value="0.001">mm</option>
             </select>
           </div>
+
           <div>
             <label>Length / Height:</label>
-            <input type="number" name="length" value={length} onChange={handleInputChange} />
-            <select name="lengthUnit" value={lengthUnit} onChange={handleInputChange}>
+            <input
+              type="number"
+              name="length"
+              value={length}
+              onChange={handleInputChange}
+            />
+            <select
+              name="lengthUnit"
+              value={lengthUnit}
+              onChange={handleInputChange}
+            >
               <option value="1">m</option>
               <option value="0.01">cm</option>
               <option value="0.001">mm</option>
@@ -83,22 +104,37 @@ export default function InventoryCalculatorTab() {
         </div>
       )}
 
+      {/* ---------------- Heads (Dished Ends) ---------------- */}
       {phase && phase !== "vapor" && (
-        <div>
-          <input type="checkbox" checked={addHead} onChange={toggleHeadSelection} />
-          <label>Add Dished Ends?</label>
+        <div className="space-y-2">
+          <label>
+            <input
+              type="checkbox"
+              checked={addHead}
+              onChange={toggleHeadSelection}
+            />{" "}
+            Add Dished Ends?
+          </label>
 
           {addHead && (
             <>
               <label>Select Head Type:</label>
-              <select name="headType" value={headType} onChange={handleInputChange}>
+              <select
+                name="headType"
+                value={headType}
+                onChange={handleInputChange}
+              >
                 <option value="hemihead">Hemispherical</option>
                 <option value="torispherical">Torispherical</option>
                 <option value="ellipsoidalhead">Ellipsoidal (2:1)</option>
               </select>
 
               <label>How many heads?</label>
-              <select name="headCount" value={headCount} onChange={handleInputChange}>
+              <select
+                name="headCount"
+                value={headCount}
+                onChange={handleInputChange}
+              >
                 <option value={2}>2 (Both Ends)</option>
                 <option value={1}>1 Head</option>
                 <option value={0}>No Head</option>
@@ -108,9 +144,16 @@ export default function InventoryCalculatorTab() {
         </div>
       )}
 
-      <div>
-        <input type="checkbox" checked={useManualVolume} onChange={toggleManualVolume} />
-        <label>Use Manual Volume</label>
+      {/* ---------------- Manual Volume ---------------- */}
+      <div className="space-y-2">
+        <label>
+          <input
+            type="checkbox"
+            checked={useManualVolume}
+            onChange={toggleManualVolume}
+          />{" "}
+          Use Manual Volume
+        </label>
 
         {useManualVolume && (
           <div>
@@ -122,7 +165,11 @@ export default function InventoryCalculatorTab() {
               onChange={handleInputChange}
             />
             <label>Unit:</label>
-            <select name="manualVolumeUnit" value={manualVolumeUnit} onChange={handleInputChange}>
+            <select
+              name="manualVolumeUnit"
+              value={manualVolumeUnit}
+              onChange={handleInputChange}
+            >
               <option value="m3">m³</option>
               <option value="ft3">ft³</option>
             </select>
@@ -130,10 +177,15 @@ export default function InventoryCalculatorTab() {
         )}
       </div>
 
+      {/* ---------------- Liquid Section ---------------- */}
       {(phase === "liquid" || phase === "both") && (
-        <div>
+        <div className="space-y-2">
           <label>Equipment Type:</label>
-          <select name="equipmentType" value={equipmentType} onChange={handleInputChange}>
+          <select
+            name="equipmentType"
+            value={equipmentType}
+            onChange={handleInputChange}
+          >
             <option value="">-- Select --</option>
             <option value="COLTOP">Column Top (25%)</option>
             <option value="COLMID">Column Middle (25%)</option>
@@ -149,7 +201,11 @@ export default function InventoryCalculatorTab() {
           </select>
 
           <label>Fluid Type:</label>
-          <select name="fluidType" value={fluidType} onChange={handleInputChange}>
+          <select
+            name="fluidType"
+            value={fluidType}
+            onChange={handleInputChange}
+          >
             <option value="">-- Select Fluid --</option>
             <option value="water">Water</option>
             <option value="diesel">Diesel</option>
@@ -159,7 +215,12 @@ export default function InventoryCalculatorTab() {
           </select>
 
           <label>Density (kg/m³):</label>
-          <input type="number" name="density" value={density} onChange={handleInputChange} />
+          <input
+            type="number"
+            name="density"
+            value={density}
+            onChange={handleInputChange}
+          />
 
           {equipmentType === "custom" && (
             <>
@@ -175,11 +236,21 @@ export default function InventoryCalculatorTab() {
         </div>
       )}
 
+      {/* ---------------- Vapor Section ---------------- */}
       {(phase === "vapor" || phase === "both") && (
-        <div>
+        <div className="space-y-2">
           <label>Flow Rate:</label>
-          <input type="number" name="flowRate" value={flowRate} onChange={handleInputChange} />
-          <select name="flowRateUnit" value={flowRateUnit} onChange={handleInputChange}>
+          <input
+            type="number"
+            name="flowRate"
+            value={flowRate}
+            onChange={handleInputChange}
+          />
+          <select
+            name="flowRateUnit"
+            value={flowRateUnit}
+            onChange={handleInputChange}
+          >
             <option value="kg/s">kg/s</option>
             <option value="kg/min">kg/min</option>
             <option value="kg/h">kg/h</option>
@@ -204,12 +275,19 @@ export default function InventoryCalculatorTab() {
         </div>
       )}
 
-      <button onClick={calculateInventory} style={{ marginTop: "20px" }}>
+      {/* ---------------- Calculate Button ---------------- */}
+      <button
+        onClick={calculateInventory}
+        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+      >
         Calculate Inventory
       </button>
 
+      {/* ---------------- Result ---------------- */}
       {result && (
-        <div style={{ marginTop: "20px", color: "green", fontWeight: "bold" }}>{result}</div>
+        <div className="mt-4 font-bold text-green-600">
+          {result}
+        </div>
       )}
     </div>
   );
