@@ -1,5 +1,7 @@
 import { useState } from "react";
 import useInventoryCalculator from "../hooks/useInventoryCalculator";
+import "../styles/InventoryCalculatorTab.css";
+
 
 export default function InventoryCalculatorTab() {
   const {
