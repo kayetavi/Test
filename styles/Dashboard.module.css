@@ -1,11 +1,13 @@
 /* Dashboard.module.css */
 
+/* Overall container */
 .container {
   display: flex;
-  height: 100vh;
   flex-direction: column;
+  height: 100vh;
 }
 
+/* Top header bar */
 .header {
   background-color: #003366;
   color: white;
@@ -17,11 +19,13 @@
   color: #ffdd00;
 }
 
+/* Main content layout: sidebar + main panel */
 .mainContent {
   flex: 1;
   display: flex;
 }
 
+/* Sidebar */
 .sidebar {
   width: 250px;
   background-color: #cce0ff;
@@ -33,6 +37,7 @@
 .featuresList {
   list-style-type: none;
   padding: 0;
+  margin: 0;
 }
 
 .tabButton {
@@ -60,6 +65,7 @@
   color: white;
 }
 
+/* Main panel (right side) */
 .mainPanel {
   flex: 1;
   padding: 30px;
@@ -67,10 +73,43 @@
   background-color: #d9e6ff;
 }
 
+/* ===== Footer styles ===== */
 .footer {
+  display: flex;                 /* allow left/right sections */
+  justify-content: space-between;
+  align-items: center;
   background-color: #003366;
   color: white;
   padding: 10px 20px;
-  text-align: center;
   font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* Left side (logout button container) */
+.footerLeft {
+  flex: 0 0 auto;
+}
+
+/* Logout button */
+.logoutButton {
+  background-color: #e53935;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+  background-color: #c62828;
+}
+
+/* Right side text (© info) */
+.footerRight {
+  flex: 1;
+  text-align: right;
+  font-size: 0.85rem;
+  color: #f0f0f0;
 }
