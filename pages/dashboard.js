@@ -6,21 +6,6 @@ import { db } from "../firebase-config";
 import ASMECalculatorTab from "../components/ASMECalculatorTab";
 import InventoryCalculatorTab from "../components/InventoryCalculatorTab";
 import ProcessPipingCalculator from "../components/ProcessPipingCalculator";
-/*
-import ThicknessMonitoringTab from "../components/ThicknessMonitoringTab";
-import FAAReleaseRateTab from "../components/FAAReleaseRateTab";
-import InventoryCalculatorTab from "../components/InventoryCalculatorTab";
-
-import CorrosionCalculationTab from "../components/CorrosionCalculationTab";
-import ToxicCalculationTab from "../components/ToxicCalculationTab";
-import RemainingLifeTab from "../components/RemainingLifeTab";
-import InspectionConfidenceTab from "../components/InspectionConfidenceTab";
-import CofCalculatorTab from "../components/CofCalculatorTab";
-import QPofCalculatorTab from "../components/QPofCalculatorTab";
-import CrackingMechanismTab from "../components/CrackingMechanismTab";
-import StressMaterialTab from "../components/StressMaterialTab";
-import ASMEB31_3Tab from "../components/ASMEB31_3Tab";
-*/
 
 import styles from "../styles/Dashboard.module.css";
 
@@ -52,44 +37,25 @@ export default function Dashboard() {
     setLoading(false);
   }, [router]);
 
+  // ✅ Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("allowedTabs");
+    localStorage.removeItem("userUid");
+    localStorage.removeItem("userEmail");
+    router.push("/"); // Redirect to login/home page
+  };
+
   if (loading) return <p>Loading...</p>;
 
-  // Function to render content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
       case "ASMESECTIONVIIIDIV1":
         return <ASMECalculatorTab />;
-           case "INVENTORY_CALCULATOR":
-        return <InventoryCalculatorTab />;
-          case "PROCESS_PIPING":
-        return <ProcessPipingCalculator />;
-      /*
-      case "THICKNESSMONITORING":
-        return <ThicknessMonitoringTab />;
-      case "FAA_RELEASE_RATE":
-        return <FAAReleaseRateTab />;
       case "INVENTORY_CALCULATOR":
         return <InventoryCalculatorTab />;
-      
-      case "CORROSION_CALCULATION":
-        return <CorrosionCalculationTab />;
-      case "TOXIC_CALCULATION":
-        return <ToxicCalculationTab />;
-      case "REMAINING_LIFE":
-        return <RemainingLifeTab />;
-      case "INSPECTION_CONFIDENCE":
-        return <InspectionConfidenceTab />;
-      case "COF_CALCULATOR":
-        return <CofCalculatorTab />;
-      case "QPOF_CALCULATOR":
-        return <QPofCalculatorTab />;
-      case "CRACKING_MECHANISM":
-        return <CrackingMechanismTab />;
-      case "STRESS_MATERIAL":
-        return <StressMaterialTab />;
-      case "ASMEB31_3":
-        return <ASMEB31_3Tab />;
-      */
+      case "PROCESS_PIPING":
+        return <ProcessPipingCalculator />;
       default:
         return <p>Select a tab to view content.</p>;
     }
@@ -131,9 +97,16 @@ export default function Dashboard() {
         <main className={styles.mainPanel}>{renderTabContent()}</main>
       </div>
 
-      {/* Footer */}
+      {/* Footer with Logout */}
       <footer className={styles.footer}>
-        © 2025 | Created by Avijit Kayet | About | Privacy Policy | Contact
+        <div className={styles.footerLeft}>
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            Logout
+          </button>
+        </div>
+        <div className={styles.footerRight}>
+          © 2025 | Created by Avijit Kayet | About | Privacy Policy | Contact
+        </div>
       </footer>
     </div>
   );
