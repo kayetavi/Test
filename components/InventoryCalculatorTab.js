@@ -40,7 +40,7 @@ export default function InventoryCalculatorTab() {
   } = state;
 
   return (
-    <div className="inventory-tab space-y-4">
+    <div className={`${styles.inventoryTab} space-y-4`}>
       {/* ---------------- Equipment Shape ---------------- */}
       <div>
         <label>Select Equipment Shape:</label>
