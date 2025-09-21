@@ -1,10 +1,23 @@
+/* Global styles for html and body to prevent scroll */
+:global(html),
+:global(body) {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Login page container styling */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh; /* better than fixed height */
   background: linear-gradient(135deg, #4f46e5, #3b82f6);
   font-family: Arial, sans-serif;
+  padding: 0 20px; /* helpful for small screens */
+  box-sizing: border-box;
+  overflow: hidden; /* hide any accidental scroll */
 }
 
 .login-card {
